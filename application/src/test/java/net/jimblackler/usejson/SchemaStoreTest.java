@@ -50,9 +50,20 @@ public class SchemaStoreTest {
               tests.add(DynamicTest.dynamicTest(testFileName, testDataUrl.toURI(), () -> {
                 String content =
                     streamToString(SchemaStoreTest.class.getResourceAsStream(testFile.toString()));
-                Object o = DocumentUtils.parseJson(content);
-                Object o2 = Parse.parseJson(content);
-                assertEquals(o.toString(), o2.toString());
+                long startTimeOwn = System.nanoTime();
+                Object own = Parse.parseJson(content);
+                long timeOwn = System.nanoTime() - startTimeOwn;
+                assert own != null;
+                long startTimeOrg = System.nanoTime();
+                Object org = DocumentUtils.parseJson(content);
+                long timeOrg = System.nanoTime() - startTimeOrg;
+                assert org != null;
+                String orgString = DocumentUtils.toString(org);
+                String ownString = DocumentUtils.toString(own);
+                System.out.println(orgString);
+                assertEquals(orgString, ownString);
+                System.out.println("Own: " + timeOwn);
+                System.out.println("Org: " + timeOrg);
               }));
             } catch (URISyntaxException e) {
               throw new IllegalStateException(e);
