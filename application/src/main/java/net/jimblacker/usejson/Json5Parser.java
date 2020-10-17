@@ -419,6 +419,26 @@ public class Json5Parser {
 
       case IDENTIFIER_NAME_START_ESCAPE:
       case IDENTIFIER_NAME:
+        switch (c) {
+          case '$':
+          case '_':
+          case '\u200C':
+          case '\u200D':
+            buffer.append(read());
+            return null;
+
+          case '\\':
+            read();
+            lexState = State.IDENTIFIER_NAME_ESCAPE;
+            return null;
+        }
+
+        if (Util.isIdContinueChar(c)) {
+          buffer.append(read());
+          return null;
+        }
+
+        return new Token(TokenType.IDENTIFIER, buffer.toString());
       case IDENTIFIER_NAME_ESCAPE:
         throw new SyntaxError("Unhandled state: " + state.name());
 
