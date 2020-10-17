@@ -415,7 +415,7 @@ public class Json5Parser {
             lexState = State.STRING;
             return null;
         }
-        break;
+        throw invalidChar(read());
 
       case IDENTIFIER_NAME_START_ESCAPE:
       case IDENTIFIER_NAME:
