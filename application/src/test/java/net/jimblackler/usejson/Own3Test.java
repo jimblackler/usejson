@@ -3,6 +3,7 @@ package net.jimblackler.usejson;
 import static net.jimblackler.usejson.ReaderUtils.getLines;
 import static net.jimblackler.usejson.StreamUtils.streamToString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.brimworks.json5.JSON5ParseError;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.util.Collection;
 import net.jimblacker.usejson.Json5JsWrapper;
 import net.jimblacker.usejson.Json5Parser;
 import net.jimblacker.usejson.JsonParseException;
+import net.jimblacker.usejson.SyntaxError;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.jupiter.api.DynamicNode;
@@ -57,7 +59,8 @@ public class Own3Test {
                   DocumentUtils.parseJson(json5JsWrapper.json5ToJson(content)));
               assertEquals(org2String, ownString);
 
-            } catch (JSONException | JSON5ParseError ex) {
+              assertTrue(shouldPass);
+            } catch (JSONException | JSON5ParseError | SyntaxError ex) {
               if (shouldPass) {
                 throw ex;
               } else {
