@@ -1,8 +1,8 @@
 package net.jimblacker.usejson;
 
 public class Util {
-  static boolean isSpaceSeparator(String c) {
-    return " ".equals(c);
+  static boolean isSpaceSeparator(char c) {
+    return c == ' ';
   }
 
   public static boolean isIdStartChar(char c) {

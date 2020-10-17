@@ -3,7 +3,6 @@ package net.jimblacker.usejson;
 import static java.lang.Integer.parseInt;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
@@ -20,10 +19,10 @@ public class Json5Parser {
   private State lexState;
   private String key;
   private Object root;
-  private String buffer;
+  private StringBuilder buffer;
   private boolean doubleQuote;
   private int sign;
-  private String c;
+  private Character c;
 
   static String formatChar(char c) {
     return "unwritten";
@@ -93,7 +92,7 @@ public class Json5Parser {
           throw invalidEOF();
         }
 
-        if (token.type == TokenType.PUNCTUATOR && "]".equals(token.value)) {
+        if (token.getType() == TokenType.PUNCTUATOR && "]".equals(token.getValue().toString())) {
           pop();
           return;
         }
@@ -106,7 +105,7 @@ public class Json5Parser {
           throw invalidEOF();
         }
 
-        switch (toChar(token.getValue().toString())) {
+        switch (token.getValue().toString().charAt(0)) {
           case ',':
             parseState = State.BEFORE_PROPERTY_NAME;
             return;
@@ -121,7 +120,7 @@ public class Json5Parser {
           throw invalidEOF();
         }
 
-        switch (toChar(token.getValue().toString())) {
+        switch (token.getValue().toString().charAt(0)) {
           case ',':
             parseState = State.BEFORE_ARRAY_VALUE;
             return;
@@ -211,22 +210,9 @@ public class Json5Parser {
     }
   }
 
-  private Character toChar(String value) {
-    if (value == null) {
-      return null;
-    }
-    if (value.isEmpty()) {
-      return null;
-    }
-    if (value.length() == 1) {
-      return value.charAt(0);
-    }
-    throw new SyntaxError("Unexpected");
-  }
-
   private Token lex() {
     lexState = State.DEFAULT;
-    buffer = "";
+    buffer = new StringBuilder();
     doubleQuote = false;
     sign = 1;
 
@@ -240,25 +226,25 @@ public class Json5Parser {
     }
   }
 
-  private String read() {
-    String c = peek();
+  private Character read() {
+    Character c = peek();
 
     if (c == null) {
       column++;
-    } else if ("\n".equals(c)) {
+    } else if (c == '\n') {
       line++;
       column = 0;
     } else {
-      column += c.length();
+      column += 1;
     }
     if (c != null) {
-      pos += c.length();
+      pos += 1;
     }
     return c;
   }
 
   private Token lexStates(State state) {
-    Character character = toChar(c);
+    Character character = c;
     switch (state) {
       case DEFAULT:
 
@@ -306,11 +292,11 @@ public class Json5Parser {
             return null;
         }
 
-        throw invalidChar(toChar(read()));
+        throw invalidChar(read());
 
       case MULTI_LINE_COMMENT:
         if (character == null) {
-          throw invalidChar(toChar(read()));
+          throw invalidChar(read());
         }
         switch (character) {
           case '*':
@@ -323,7 +309,7 @@ public class Json5Parser {
 
       case MULTI_LINE_COMMENT_ASTERISK:
         if (character == null) {
-          throw invalidChar(toChar(read()));
+          throw invalidChar(read());
         }
         switch (character) {
           case '*':
@@ -382,7 +368,7 @@ public class Json5Parser {
 
           case '-':
           case '+':
-            if ("-".equals(read())) {
+            if (read() == '-') {
               sign = -1;
             }
 
@@ -390,12 +376,12 @@ public class Json5Parser {
             return null;
 
           case '.':
-            buffer = read();
+            buffer = new StringBuilder().append(read());
             lexState = State.DECIMAL_POINT_LEADING;
             return null;
 
           case '0':
-            buffer = read();
+            buffer = new StringBuilder().append(read());
             lexState = State.ZERO;
             return null;
 
@@ -408,7 +394,7 @@ public class Json5Parser {
           case '7':
           case '8':
           case '9':
-            buffer = read();
+            buffer = new StringBuilder().append(read());
             lexState = State.DECIMAL_INTEGER;
             return null;
 
@@ -424,8 +410,8 @@ public class Json5Parser {
 
           case '"':
           case '\'':
-            doubleQuote = ("\"".equals(read()));
-            buffer = "";
+            doubleQuote = (read() == '\"');
+            buffer = new StringBuilder();
             lexState = State.STRING;
             return null;
         }
@@ -439,12 +425,12 @@ public class Json5Parser {
       case SIGN:
         switch (character) {
           case '.':
-            buffer = read();
+            buffer = new StringBuilder().append(read());
             lexState = State.DECIMAL_POINT_LEADING;
             return null;
 
           case '0':
-            buffer = read();
+            buffer = new StringBuilder().append(read());
             lexState = State.ZERO;
             return null;
 
@@ -457,7 +443,7 @@ public class Json5Parser {
           case '7':
           case '8':
           case '9':
-            buffer = read();
+            buffer = new StringBuilder().append(read());
             lexState = State.DECIMAL_INTEGER;
             return null;
 
@@ -472,25 +458,25 @@ public class Json5Parser {
             return new Token(TokenType.NUMERIC, Double.NaN);
         }
 
-        throw invalidChar(toChar(read()));
+        throw invalidChar(read());
 
       case ZERO:
         if (character != null) {
           switch (character) {
             case '.':
-              buffer += read();
+              buffer.append(read());
               lexState = State.DECIMAL_POINT;
               return null;
 
             case 'e':
             case 'E':
-              buffer += read();
+              buffer.append(read());
               lexState = State.DECIMAL_EXPONENT;
               return null;
 
             case 'x':
             case 'X':
-              buffer += read();
+              buffer.append(read());
               lexState = State.HEXADECIMAL;
               return null;
           }
@@ -501,116 +487,116 @@ public class Json5Parser {
         if (character != null) {
           switch (character) {
             case '.':
-              buffer += read();
+              buffer.append(read());
               lexState = State.DECIMAL_POINT;
               return null;
             case 'e':
             case 'E':
-              buffer += read();
+              buffer.append(read());
               lexState = State.DECIMAL_EXPONENT;
               return null;
           }
 
           if (Util.isDigit(character)) {
-            buffer += read();
+            buffer.append(read());
             return null;
           }
         }
-        return new Token(TokenType.NUMERIC, sign * parseInt(buffer));
+        return new Token(TokenType.NUMERIC, sign * parseInt(buffer.toString()));
 
       case DECIMAL_POINT_LEADING:
         if (character != null) {
           if (Util.isDigit(character)) {
-            buffer += read();
+            buffer.append(read());
             lexState = State.DECIMAL_FRACTION;
             return null;
           }
         }
-        throw invalidChar(toChar(read()));
+        throw invalidChar(read());
 
       case DECIMAL_POINT:
         switch (character) {
           case 'e':
           case 'E':
-            buffer += read();
+            buffer.append(read());
             lexState = State.DECIMAL_EXPONENT;
             return null;
         }
 
         if (Util.isDigit(character)) {
-          buffer += read();
+          buffer.append(read());
           lexState = State.DECIMAL_FRACTION;
           return null;
         }
 
-        return new Token(TokenType.NUMERIC, sign * Integer.parseInt(buffer));
+        return new Token(TokenType.NUMERIC, sign * parseInt(buffer.toString()));
 
       case DECIMAL_FRACTION:
         if (character != null) {
           switch (character) {
             case 'e':
             case 'E':
-              buffer += read();
+              buffer.append(read());
               lexState = State.DECIMAL_EXPONENT;
               return null;
           }
 
           if (Util.isDigit(character)) {
-            buffer += read();
+            buffer.append(read());
             return null;
           }
         }
-        return new Token(TokenType.NUMERIC, sign * Double.parseDouble(buffer));
+        return new Token(TokenType.NUMERIC, sign * Double.parseDouble(buffer.toString()));
 
       case DECIMAL_EXPONENT:
         if (character != null) {
           switch (character) {
             case '+':
             case '-':
-              buffer += read();
+              buffer.append(read());
               lexState = State.DECIMAL_EXPONENT_SIGN;
               return null;
           }
 
           if (Util.isDigit(character)) {
-            buffer += read();
+            buffer.append(read());
             lexState = State.DECIMAL_EXPONENT_INTEGER;
             return null;
           }
         }
-        throw invalidChar(toChar(read()));
+        throw invalidChar(read());
 
       case DECIMAL_EXPONENT_SIGN:
         if (Util.isDigit(character)) {
-          buffer += read();
+          buffer.append(read());
           lexState = State.DECIMAL_EXPONENT_INTEGER;
           return null;
         }
 
-        throw invalidChar(toChar(read()));
+        throw invalidChar(read());
 
       case DECIMAL_EXPONENT_INTEGER:
         if (character != null) {
           if (Util.isDigit(character)) {
-            buffer += read();
+            buffer.append(read());
             return null;
           }
         }
-        return new Token(
-            TokenType.NUMERIC, BigDecimal.valueOf(sign).multiply(new BigDecimal(buffer)));
+        return new Token(TokenType.NUMERIC,
+            BigDecimal.valueOf(sign).multiply(new BigDecimal(buffer.toString())));
 
       case HEXADECIMAL:
         if (Util.isHexDigit(character)) {
-          buffer += read();
+          buffer.append(read());
           lexState = State.HEXADECIMAL_INTEGER;
           return null;
         }
-        throw invalidChar(toChar(read()));
+        throw invalidChar(read());
 
       case HEXADECIMAL_INTEGER:
         if (character != null) {
           if (Util.isHexDigit(character)) {
-            buffer += read();
+            buffer.append(read());
             return null;
           }
         }
@@ -620,7 +606,7 @@ public class Json5Parser {
         switch (character) {
           case '\\':
             read();
-            buffer += escape();
+            buffer.append(escape());
             return null;
 
           case '"':
@@ -629,7 +615,7 @@ public class Json5Parser {
               return new Token(TokenType.STRING, buffer);
             }
 
-            buffer += read();
+            buffer.append(read());
             return null;
 
           case '\'':
@@ -638,12 +624,12 @@ public class Json5Parser {
               return new Token(TokenType.STRING, buffer);
             }
 
-            buffer += read();
+            buffer.append(read());
             return null;
 
           case '\n':
           case '\r':
-            throw invalidChar(toChar(read()));
+            throw invalidChar(read());
 
           case '\u2028':
           case '\u2029':
@@ -651,7 +637,7 @@ public class Json5Parser {
             break;
         }
 
-        buffer += read();
+        buffer.append(read());
         break;
 
       case START:
@@ -668,7 +654,7 @@ public class Json5Parser {
         switch (character) {
           case '$':
           case '_':
-            buffer = read();
+            buffer = new StringBuilder().append(read());
             lexState = State.IDENTIFIER_NAME;
             return null;
 
@@ -682,24 +668,24 @@ public class Json5Parser {
 
           case '"':
           case '\'':
-            doubleQuote = ("\"".equals(read()));
+            doubleQuote = read() == '\"';
             lexState = State.STRING;
             return null;
         }
 
         if (Util.isIdStartChar(character)) {
-          buffer += read();
+          buffer.append(read());
           lexState = State.IDENTIFIER_NAME;
           return null;
         }
 
-        throw invalidChar(toChar(read()));
+        throw invalidChar(read());
 
       case AFTER_PROPERTY_NAME:
-        if (":".equals(this.c)) {
+        if (c == ':') {
           return new Token(TokenType.PUNCTUATOR, read());
         }
-        throw invalidChar(toChar(read()));
+        throw invalidChar(read());
 
       case BEFORE_PROPERTY_VALUE:
         lexState = State.VALUE;
@@ -711,7 +697,7 @@ public class Json5Parser {
           case '}':
             return new Token(TokenType.PUNCTUATOR, read());
         }
-        throw invalidChar(toChar(read()));
+        throw invalidChar(read());
 
       case BEFORE_ARRAY_VALUE:
         if (character == ']') {
@@ -726,7 +712,7 @@ public class Json5Parser {
           case ']':
             return new Token(TokenType.PUNCTUATOR, read());
         }
-        throw invalidChar(toChar(read()));
+        throw invalidChar(read());
 
       case END:
         throw new SyntaxError("Unhandled state: " + state.name());
@@ -739,18 +725,17 @@ public class Json5Parser {
 
   private void literal(String s) {
     for (char c : s.toCharArray()) {
-      String p = peek();
-      if (toChar(p) != c) {
-        throw invalidChar(toChar(read()));
+      Character p = peek();
+      if (p != c) {
+        throw invalidChar(read());
       }
       read();
     }
   }
 
   private char escape() {
-    String c = peek();
-    Character character = toChar(c);
-    switch (character) {
+    Character c = peek();
+    switch (c) {
       case 'b':
         read();
         return '\b';
@@ -777,8 +762,8 @@ public class Json5Parser {
 
       case '0':
         read();
-        if (Util.isDigit(toChar(peek()))) {
-          throw invalidChar(toChar(read()));
+        if (Util.isDigit(peek())) {
+          throw invalidChar(read());
         }
 
         return '\0';
@@ -799,7 +784,7 @@ public class Json5Parser {
 
       case '\r':
         read();
-        if (toChar(peek()) == '\n') {
+        if (peek() == '\n') {
           read();
         }
 
@@ -814,55 +799,54 @@ public class Json5Parser {
       case '7':
       case '8':
       case '9':
-        throw invalidChar(toChar(read()));
+        throw invalidChar(read());
     }
 
-    return toChar(read());
+    return read();
   }
 
   char hexEscape() {
-    Character character = toChar(c);
-    String buffer = "";
-    String c = peek();
+    Character character = c;
+    StringBuilder buffer = new StringBuilder();
+    Character c = peek();
 
     if (!Util.isHexDigit(character)) {
-      throw invalidChar(toChar(read()));
+      throw invalidChar(read());
     }
 
-    buffer += read();
+    buffer.append(read());
 
     c = peek();
     if (!Util.isHexDigit(character)) {
-      throw invalidChar(toChar(read()));
+      throw invalidChar(read());
     }
 
-    buffer += read();
+    buffer.append(read());
 
-    return (char) parseInt(buffer, 16);
+    return (char) parseInt(buffer.toString(), 16);
   }
 
   char unicodeEscape() {
-    String buffer = "";
+    StringBuilder buffer = new StringBuilder();
     int count = 4;
 
     while (count-- > 0) {
-      String c = peek();
-      Character character = toChar(c);
-      if (!Util.isHexDigit(character)) {
-        throw invalidChar(toChar(read()));
+      Character c = peek();
+      if (!Util.isHexDigit(c)) {
+        throw invalidChar(read());
       }
 
-      buffer += read();
+      buffer.append(read());
     }
 
-    return (char) parseInt(buffer, 16);
+    return (char) parseInt(buffer.toString(), 16);
   }
 
-  private String peek() {
+  private Character peek() {
     if (pos >= source.length()) {
       return null;
     }
-    return source.substring(pos, pos + 1);
+    return source.charAt(pos);
   }
 
   private SyntaxError invalidChar(Character c) {
