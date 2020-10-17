@@ -1,0 +1,19 @@
+package net.jimblacker.usejson;
+
+public class Util {
+  static boolean isSpaceSeparator(String c) {
+    return " ".equals(c);
+  }
+
+  public static boolean isIdStartChar(char c) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c == '$') || (c == '_');
+  }
+
+  public static boolean isDigit(char c) {
+    return c >= '0' && c <= '9';
+  }
+
+  public static boolean isHexDigit(char c) {
+    return isDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+  }
+}

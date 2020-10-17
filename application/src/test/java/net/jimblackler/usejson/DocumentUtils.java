@@ -22,6 +22,9 @@ public class DocumentUtils {
   }
 
   public static String toString(Object object) {
+    if (object == null) {
+      return "null";
+    }
     if (object instanceof JSONObject) {
       return ((JSONObject) object).toString(2);
     }

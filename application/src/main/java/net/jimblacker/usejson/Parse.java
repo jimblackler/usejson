@@ -12,6 +12,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Parse {
+  public static Object parseJson(String content) {
+    AtomicReference<Object> outObject = new AtomicReference<>();
+    JSON5Parser parser = new JSON5Parser();
+    parser.setVisitor(new Visitor(outObject::set));
+    parser.parse(content, "");
+    return outObject.get();
+  }
+
   static class Visitor implements JSON5Visitor {
     private final List<Consumer<Object>> stack = new ArrayList<>();
     private JSONObject activeObject;
@@ -119,15 +127,5 @@ public class Parse {
 
     @Override
     public void endOfStream(int line, long offset) {}
-  };
-
-  public static Object parseJson(String content) {
-    AtomicReference<Object> outObject = new AtomicReference<>();
-    JSON5Parser parser = new JSON5Parser();
-    Visitor visitor = new Visitor(outObject::set);
-    parser.setVisitor(visitor);
-    parser.parse(content, "");
-
-    return outObject.get();
   }
 }
