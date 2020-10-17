@@ -47,17 +47,15 @@ public class Own3Test {
               Json5Parser json5Parser = new Json5Parser();
               Object own = json5Parser.parse(content);
 
-              JSONArray wrapper = new JSONArray();
-              wrapper.put(own);
-
+              String ownString = DocumentUtils.toString(own);
               if (!testFile.endsWith(".json5")) {
-                String orgString = DocumentUtils.toString(new JSONArray("[" + content + "]"));
-                assertEquals(orgString, DocumentUtils.toString(wrapper));
+                String orgString = DocumentUtils.toString(DocumentUtils.parseJson(content));
+                assertEquals(orgString, ownString);
               }
 
               String org2String = DocumentUtils.toString(
-                  new JSONArray("[" + json5JsWrapper.json5ToJson(content) + "]"));
-              assertEquals(org2String, DocumentUtils.toString(wrapper));
+                  DocumentUtils.parseJson(json5JsWrapper.json5ToJson(content)));
+              assertEquals(org2String, ownString);
 
             } catch (JSONException | JSON5ParseError ex) {
               if (shouldPass) {
