@@ -44,33 +44,27 @@ public class Own3Test {
           String content = streamToString(
               Own3Test.class.getResourceAsStream(testDir.resolve(testFile).toString()));
           System.out.println(content);
+
           try {
-            try {
-              Json5Parser json5Parser = new Json5Parser();
-              Object own = json5Parser.parse(content);
+            Json5Parser json5Parser = new Json5Parser();
+            Object own = json5Parser.parse(content);
+            assertTrue(shouldPass);
 
-              String ownString = DocumentUtils.toString(own);
-              if (!testFile.endsWith(".json5")) {
-                String orgString = DocumentUtils.toString(DocumentUtils.parseJson(content));
-                assertEquals(orgString, ownString);
-              }
-
-              String org2String = DocumentUtils.toString(
-                  DocumentUtils.parseJson(json5JsWrapper.json5ToJson(content)));
-              assertEquals(org2String, ownString);
-
-              assertTrue(shouldPass);
-            } catch (JSONException | JSON5ParseError | SyntaxError ex) {
-              if (shouldPass) {
-                throw ex;
-              } else {
-                ex.printStackTrace();
-              }
+            String ownString = DocumentUtils.toString(own);
+            if (!testFile.endsWith(".json5")) {
+              String orgString = DocumentUtils.toString(DocumentUtils.parseJson(content));
+              assertEquals(orgString, ownString);
             }
 
-          } catch (JsonParseException ex) {
+            String org2String = DocumentUtils.toString(
+                DocumentUtils.parseJson(json5JsWrapper.json5ToJson(content)));
+            assertEquals(org2String, ownString);
+
+          } catch (JsonParseException | JSONException | JSON5ParseError | SyntaxError ex) {
             if (shouldPass) {
               throw ex;
+            } else {
+              ex.printStackTrace();
             }
           }
 
