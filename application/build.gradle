@@ -16,8 +16,6 @@ repositories {
 }
 
 dependencies {
-    //implementation 'com.brimworks:json5:2.0.0'
-    implementation 'com.brimworks:json5:2.0.0b'
     implementation 'com.github.jimblackler:JSON-java:v0.4-alpha'
     implementation 'org.graalvm.js:js:20.2.0'
     implementation 'org.graalvm.sdk:graal-sdk:20.2.0'
