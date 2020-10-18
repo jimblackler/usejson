@@ -886,7 +886,7 @@ public class Json5Parser {
     }
 
     return new SyntaxError(
-        "JSON5: invalid character " + formatChar(c) + " of input at " + line + ":" + column);
+        "JSON5: invalid character '" + formatChar(c) + "' at " + line + ":" + column);
   }
 
   private SyntaxError invalidEOF() {

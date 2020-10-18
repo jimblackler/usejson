@@ -21,7 +21,7 @@ public class Json5JsWrapper {
     try {
       return _json5ToJson.execute(str).toString();
     } catch (PolyglotException ex) {
-      throw new SyntaxError(ex);
+      throw new SyntaxError(ex.getMessage().replaceFirst("SyntaxError: ", ""));
     }
   }
 }
