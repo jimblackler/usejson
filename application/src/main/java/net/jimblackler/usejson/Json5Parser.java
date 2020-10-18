@@ -25,7 +25,15 @@ public class Json5Parser {
   private Character c;
 
   static String formatChar(char c) {
-    return "unwritten";
+    String s = String.valueOf(c);
+    return s.replace("\\", "\\\\")
+        .replace("\t", "\\t")
+        .replace("\b", "\\b")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\f", "\\f")
+        .replace("\'", "\\'")
+        .replace("\"", "\\\"");
   }
 
   public Object parse(String text) {
@@ -739,9 +747,9 @@ public class Json5Parser {
         throw invalidChar(read());
 
       case END:
-        throw new SyntaxError("Unhandled state: " + state.name());
+        throw invalidChar(read());
       default:
-        throw new SyntaxError("Unknown state: " + state.name());
+        throw new InternalParserError("Unknown state: " + state.name());
     }
 
     return null;
@@ -830,18 +838,17 @@ public class Json5Parser {
   }
 
   char hexEscape() {
-    Character character = c;
     StringBuilder buffer = new StringBuilder();
     Character c = peek();
 
-    if (!Util.isHexDigit(character)) {
+    if (!Util.isHexDigit(c)) {
       throw invalidChar(read());
     }
 
     buffer.append(read());
 
     c = peek();
-    if (!Util.isHexDigit(character)) {
+    if (!Util.isHexDigit(c)) {
       throw invalidChar(read());
     }
 
