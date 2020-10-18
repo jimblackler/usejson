@@ -1,6 +1,6 @@
-package net.jimblacker.usejson;
+package net.jimblackler.usejson;
 
-import static net.jimblacker.usejson.StreamUtils.streamToString;
+import static net.jimblackler.usejson.StreamUtils.streamToString;
 
 import java.io.IOException;
 import java.io.PrintWriter;

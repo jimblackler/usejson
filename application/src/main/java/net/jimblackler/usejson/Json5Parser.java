@@ -1,4 +1,4 @@
-package net.jimblacker.usejson;
+package net.jimblackler.usejson;
 
 import static java.lang.Integer.parseInt;
 

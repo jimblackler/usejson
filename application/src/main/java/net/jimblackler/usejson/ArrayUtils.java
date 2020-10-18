@@ -1,4 +1,4 @@
-package net.jimblacker.usejson;
+package net.jimblackler.usejson;
 
 import java.lang.reflect.Array;
 

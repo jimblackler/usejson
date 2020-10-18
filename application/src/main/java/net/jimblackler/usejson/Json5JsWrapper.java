@@ -1,6 +1,6 @@
-package net.jimblacker.usejson;
+package net.jimblackler.usejson;
 
-import static net.jimblacker.usejson.CacheLoader.load;
+import static net.jimblackler.usejson.CacheLoader.load;
 
 import java.io.IOException;
 import java.net.URI;

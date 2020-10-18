@@ -12,11 +12,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import net.jimblacker.usejson.Json5JsWrapper;
-import net.jimblacker.usejson.Json5Parser;
-import net.jimblacker.usejson.JsonParseException;
-import net.jimblacker.usejson.SyntaxError;
-import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;

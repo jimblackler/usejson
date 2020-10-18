@@ -1,4 +1,4 @@
-package net.jimblacker.usejson;
+package net.jimblackler.usejson;
 
 public class Util {
   static boolean isSpaceSeparator(char c) {

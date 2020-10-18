@@ -1,4 +1,4 @@
-package net.jimblacker.usejson;
+package net.jimblackler.usejson;
 
 import com.brimworks.json5.JSON5Parser;
 import com.brimworks.json5.JSON5Visitor;
