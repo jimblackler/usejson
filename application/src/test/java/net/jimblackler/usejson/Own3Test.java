@@ -5,14 +5,12 @@ import static net.jimblackler.usejson.StreamUtils.streamToString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.brimworks.json5.JSON5ParseError;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-
 import org.json.JSONException;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
@@ -54,7 +52,6 @@ public class Own3Test {
               ex.printStackTrace();
             }
           }
-
 
           if (!testFile.endsWith(".json5")) {
             try {
