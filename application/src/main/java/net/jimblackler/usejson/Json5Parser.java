@@ -44,7 +44,7 @@ public class Json5Parser {
     line = 1;
     column = 0;
     token = null;
-    // key = undefined;
+    key = null;
     root = null;
     do {
       token = lex();
