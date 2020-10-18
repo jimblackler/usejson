@@ -3,6 +3,7 @@ package net.jimblackler.usejson;
 import static net.jimblackler.usejson.ReaderUtils.getLines;
 import static net.jimblackler.usejson.StreamUtils.streamToString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -39,8 +40,18 @@ public class Own3Test {
               Own3Test.class.getResourceAsStream(testDir.resolve(testFile).toString()));
           System.out.println(content);
           String ownString = "<invalid>";
+          String wrappedString = "<invalid>";
           String ownError = "";
           String wrappedError = "";
+
+          try {
+            wrappedString = DocumentUtils.toString(
+                DocumentUtils.parseJson(json5JsWrapper.json5ToJson(content)));
+            assertTrue(shouldPass);
+          } catch (SyntaxError ex) {
+            assertFalse(shouldPass);
+            wrappedError = ex.getMessage();
+          }
 
           try {
             Json5Parser json5Parser = new Json5Parser();
@@ -48,12 +59,9 @@ public class Own3Test {
             assertTrue(shouldPass);
             ownString = DocumentUtils.toString(own);
           } catch (SyntaxError ex) {
-            if (shouldPass) {
-              throw ex;
-            } else {
-              ownError = ex.getMessage();
-              System.out.print(ownError);
-            }
+            assertFalse(shouldPass);
+            ownError = ex.getMessage();
+            System.out.print(ownError);
           }
 
           if (false)
@@ -71,19 +79,7 @@ public class Own3Test {
               }
             }
 
-          try {
-            String wrappedString = DocumentUtils.toString(
-                DocumentUtils.parseJson(json5JsWrapper.json5ToJson(content)));
-            assertEquals(wrappedString, ownString);
-            assertTrue(shouldPass);
-          } catch (SyntaxError ex) {
-            if (shouldPass) {
-              throw ex;
-            } else {
-              wrappedError = ex.getMessage();
-            }
-          }
-
+          assertEquals(wrappedString, ownString);
           assertEquals(wrappedError, ownError);
 
         } catch (IOException e) {
