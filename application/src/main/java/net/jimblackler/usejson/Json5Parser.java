@@ -13,7 +13,9 @@ import org.json.JSONObject;
 /**
  * JSON 5 parser.
  *
- * Ported to Java from https://github.com/json5/json5/blob/master/lib/parse.js by Jim Blacker.
+ * Based on https://github.com/json5/json5/blob/master/lib/parse.js
+ *
+ * Ported to Java by Jim Blackler.
  */
 public class Json5Parser {
   private static final Logger LOG = Logger.getLogger(Json5Parser.class.getName());
