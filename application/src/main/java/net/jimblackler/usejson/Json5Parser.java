@@ -12,10 +12,8 @@ import org.json.JSONObject;
 
 /**
  * JSON 5 parser.
- *
  * Based on https://github.com/json5/json5/blob/master/lib/parse.js
- *
- * Ported to Java by Jim Blackler.
+ * Ported to Java by Jim Blackler (jimblackler@gmail.com).
  */
 public class Json5Parser {
   private static final Logger LOG = Logger.getLogger(Json5Parser.class.getName());
@@ -36,15 +34,39 @@ public class Json5Parser {
   private Object root;
 
   static String formatChar(char c) {
-    String s = String.valueOf(c);
-    return s.replace("\\", "\\\\")
-        .replace("\t", "\\t")
-        .replace("\b", "\\b")
-        .replace("\n", "\\n")
-        .replace("\r", "\\r")
-        .replace("\f", "\\f")
-        .replace("'", "\\'")
-        .replace("\"", "\\\"");
+    switch (c) {
+      case '\'':
+        return "\\'";
+      case '"':
+        return "\\\"";
+      case '\\':
+        return "\\\\";
+      case '\b':
+        return "\\b";
+      case '\f':
+        return "\\f";
+      case '\n':
+        return "\\n";
+      case '\r':
+        return "\\r";
+      case '\t':
+        return "\\t";
+      // case '\\v':
+      //  return "\\v";
+      case '\0':
+        return "\\0";
+      case '\u2028':
+        return "\\u2028";
+      case '\u2029':
+        return "\u2029";
+    }
+
+    if (c < ' ') {
+      String hexString = Integer.toString(c, 16);
+      return "\\x" + ("00" + hexString).substring(hexString.length());
+    }
+
+    return String.valueOf(c);
   }
 
   public Object parse(String text) {
