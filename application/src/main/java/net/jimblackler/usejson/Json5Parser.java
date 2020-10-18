@@ -5,10 +5,14 @@ import static java.lang.Integer.parseInt;
 import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
+import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Json5Parser {
+  private static final Logger LOG = Logger.getLogger(Json5Parser.class.getName());
+
+  private final StringBuilder buffer = new StringBuilder();
   private String source;
   private State parseState;
   private LinkedList<Object> stack;
@@ -17,12 +21,11 @@ public class Json5Parser {
   private int column;
   private Token token;
   private State lexState;
-  private String key;
-  private Object root;
-  private final StringBuilder buffer = new StringBuilder();
   private boolean doubleQuote;
   private int sign;
   private Character c;
+  private String key;
+  private Object root;
 
   static String formatChar(char c) {
     String s = String.valueOf(c);
@@ -32,7 +35,7 @@ public class Json5Parser {
         .replace("\n", "\\n")
         .replace("\r", "\\r")
         .replace("\f", "\\f")
-        .replace("\'", "\\'")
+        .replace("'", "\\'")
         .replace("\"", "\\\"");
   }
 
@@ -55,169 +58,6 @@ public class Json5Parser {
     return root;
   }
 
-  private void parseStates() {
-    switch (parseState) {
-      case START:
-        if (token.getType() == TokenType.EOF) {
-          throw invalidEOF();
-        }
-
-        push();
-        break;
-
-      case BEFORE_PROPERTY_NAME:
-        switch (token.getType()) {
-          case IDENTIFIER:
-          case STRING:
-
-            key = token.getValue().toString();
-            parseState = State.AFTER_PROPERTY_NAME;
-            return;
-
-          case PUNCTUATOR:
-            pop();
-            return;
-
-          case EOF:
-            throw invalidEOF();
-        }
-        break;
-      case AFTER_PROPERTY_NAME:
-        if (token.getType() == TokenType.EOF) {
-          throw invalidEOF();
-        }
-        parseState = State.BEFORE_PROPERTY_VALUE;
-        break;
-
-      case BEFORE_PROPERTY_VALUE:
-        if (token.getType() == TokenType.EOF) {
-          throw invalidEOF();
-        }
-        push();
-        break;
-      case BEFORE_ARRAY_VALUE:
-        if (token.getType() == TokenType.EOF) {
-          throw invalidEOF();
-        }
-
-        if (token.getType() == TokenType.PUNCTUATOR && ((Character) token.getValue()) == ']') {
-          pop();
-          return;
-        }
-
-        push();
-        break;
-
-      case AFTER_PROPERTY_VALUE:
-        if (token.getType() == TokenType.EOF) {
-          throw invalidEOF();
-        }
-
-        switch ((Character) token.getValue()) {
-          case ',':
-            parseState = State.BEFORE_PROPERTY_NAME;
-            return;
-
-          case '}':
-            pop();
-        }
-        break;
-
-      case AFTER_ARRAY_VALUE:
-        if (token.getType() == TokenType.EOF) {
-          throw invalidEOF();
-        }
-
-        switch ((Character) token.getValue()) {
-          case ',':
-            parseState = State.BEFORE_ARRAY_VALUE;
-            return;
-
-          case ']':
-            pop();
-        }
-        break;
-      case END:
-        break;
-    }
-  }
-
-  private void push() {
-    Object value;
-
-    switch (token.getType()) {
-      case PUNCTUATOR:
-        Object token = this.token.getValue();
-        switch ((Character) token) {
-          case '{':
-            value = new JSONObject();
-            break;
-
-          case '[':
-            value = new JSONArray();
-            break;
-
-          default:
-            throw new InternalParserError();
-        }
-        break;
-      case NULL:
-      case BOOLEAN:
-      case NUMERIC:
-      case STRING:
-        value = this.token.getValue();
-        break;
-      default:
-        throw new InternalParserError();
-    }
-
-    if (root == null) {
-      root = value;
-    } else {
-      Object parent = stack.getLast();
-      if (parent instanceof JSONArray) {
-        ((JSONArray) parent).put(value);
-      } else {
-        ((JSONObject) parent).put(key, value);
-      }
-    }
-
-    if (value instanceof JSONArray || value instanceof JSONObject) {
-      stack.add(value);
-      if (value instanceof JSONArray) {
-        parseState = State.BEFORE_ARRAY_VALUE;
-      } else {
-        parseState = State.BEFORE_PROPERTY_NAME;
-      }
-    } else {
-      try {
-        Object current = stack.getLast();
-        if (current instanceof JSONArray) {
-          parseState = State.AFTER_ARRAY_VALUE;
-        } else {
-          parseState = State.AFTER_PROPERTY_VALUE;
-        }
-      } catch (NoSuchElementException e) {
-        parseState = State.END;
-      }
-    }
-  }
-
-  private void pop() {
-    stack.removeLast();
-
-    try {
-      Object current = stack.getLast();
-      if (current instanceof JSONArray) {
-        parseState = State.AFTER_ARRAY_VALUE;
-      } else {
-        parseState = State.AFTER_PROPERTY_VALUE;
-      }
-    } catch (NoSuchElementException ex) {
-      parseState = State.END;
-    }
-  }
-
   private Token lex() {
     lexState = State.DEFAULT;
     buffer.setLength(0);
@@ -231,6 +71,14 @@ public class Json5Parser {
       if (token != null) {
         return token;
       }
+    }
+  }
+
+  private Character peek() {
+    try {
+      return source.charAt(pos);
+    } catch (StringIndexOutOfBoundsException e) {
+      return null;
     }
   }
 
@@ -254,7 +102,6 @@ public class Json5Parser {
   private Token lexStates(State state) {
     switch (state) {
       case DEFAULT:
-
         if (c == null) {
           read();
           return new Token(TokenType.EOF);
@@ -428,6 +275,29 @@ public class Json5Parser {
         throw invalidChar(read());
 
       case IDENTIFIER_NAME_START_ESCAPE:
+        if (c != 'u') {
+          throw invalidChar(read());
+        }
+
+        read();
+        char u = unicodeEscape();
+        switch (u) {
+          case '$':
+          case '_':
+            break;
+
+          default:
+            if (!Util.isIdStartChar(u)) {
+              throw invalidIdentifier();
+            }
+
+            break;
+        }
+
+        buffer.append(u);
+        lexState = State.IDENTIFIER_NAME;
+        break;
+
       case IDENTIFIER_NAME:
         switch (c) {
           case '$':
@@ -451,7 +321,30 @@ public class Json5Parser {
         return new Token(TokenType.IDENTIFIER, buffer.toString());
 
       case IDENTIFIER_NAME_ESCAPE:
-        throw new InternalParserError("Unhandled state: " + state.name());
+        if (c != 'u') {
+          throw invalidChar(read());
+        }
+
+        read();
+        char u1 = unicodeEscape();
+        switch (u1) {
+          case '$':
+          case '_':
+          case '\u200C':
+          case '\u200D':
+            break;
+
+          default:
+            if (!Util.isIdContinueChar(u1)) {
+              throw invalidIdentifier();
+            }
+
+            break;
+        }
+
+        buffer.append(u1);
+        lexState = State.IDENTIFIER_NAME;
+        break;
 
       case SIGN:
         switch (c) {
@@ -669,7 +562,7 @@ public class Json5Parser {
 
           case '\u2028':
           case '\u2029':
-            // Invalid ECMAScript.
+            separatorChar(c);
             break;
         }
 
@@ -705,7 +598,7 @@ public class Json5Parser {
 
           case '"':
           case '\'':
-            doubleQuote = read() == '\"';
+            doubleQuote = (read() == '\"');
             lexState = State.STRING;
             return null;
         }
@@ -734,6 +627,7 @@ public class Json5Parser {
           case '}':
             return new Token(TokenType.PUNCTUATOR, read());
         }
+
         throw invalidChar(read());
 
       case BEFORE_ARRAY_VALUE:
@@ -749,6 +643,7 @@ public class Json5Parser {
           case ']':
             return new Token(TokenType.PUNCTUATOR, read());
         }
+
         throw invalidChar(read());
 
       case END:
@@ -763,15 +658,20 @@ public class Json5Parser {
   private void literal(String s) {
     for (char c : s.toCharArray()) {
       Character p = peek();
+
       if (p != c) {
         throw invalidChar(read());
       }
+
       read();
     }
   }
 
   private char escape() {
     Character c = peek();
+    if (c == null) {
+      throw invalidChar(read());
+    }
     switch (c) {
       case 'b':
         read();
@@ -825,7 +725,7 @@ public class Json5Parser {
           read();
         }
 
-        return 0; // correct?
+        return 0;
 
       case '1':
       case '2':
@@ -878,11 +778,169 @@ public class Json5Parser {
     return (char) parseInt(buffer.toString(), 16);
   }
 
-  private Character peek() {
+  private void parseStates() {
+    switch (parseState) {
+      case START:
+        if (token.getType() == TokenType.EOF) {
+          throw invalidEOF();
+        }
+
+        push();
+        break;
+
+      case BEFORE_PROPERTY_NAME:
+        switch (token.getType()) {
+          case IDENTIFIER:
+          case STRING:
+            key = token.getValue().toString();
+            parseState = State.AFTER_PROPERTY_NAME;
+            return;
+
+          case PUNCTUATOR:
+            pop();
+            return;
+
+          case EOF:
+            throw invalidEOF();
+        }
+        break;
+
+      case AFTER_PROPERTY_NAME:
+        if (token.getType() == TokenType.EOF) {
+          throw invalidEOF();
+        }
+        parseState = State.BEFORE_PROPERTY_VALUE;
+        break;
+
+      case BEFORE_PROPERTY_VALUE:
+        if (token.getType() == TokenType.EOF) {
+          throw invalidEOF();
+        }
+
+        push();
+        break;
+
+      case BEFORE_ARRAY_VALUE:
+        if (token.getType() == TokenType.EOF) {
+          throw invalidEOF();
+        }
+
+        if (token.getType() == TokenType.PUNCTUATOR && ((Character) token.getValue()) == ']') {
+          pop();
+          return;
+        }
+
+        push();
+        break;
+
+      case AFTER_PROPERTY_VALUE:
+        if (token.getType() == TokenType.EOF) {
+          throw invalidEOF();
+        }
+
+        switch ((Character) token.getValue()) {
+          case ',':
+            parseState = State.BEFORE_PROPERTY_NAME;
+            return;
+
+          case '}':
+            pop();
+        }
+        break;
+
+      case AFTER_ARRAY_VALUE:
+        if (token.getType() == TokenType.EOF) {
+          throw invalidEOF();
+        }
+
+        switch ((Character) token.getValue()) {
+          case ',':
+            parseState = State.BEFORE_ARRAY_VALUE;
+            return;
+
+          case ']':
+            pop();
+        }
+        break;
+
+      case END:
+        break;
+    }
+  }
+
+  private void push() {
+    Object value;
+
+    switch (token.getType()) {
+      case PUNCTUATOR:
+        Object token = this.token.getValue();
+        switch ((Character) token) {
+          case '{':
+            value = new JSONObject();
+            break;
+
+          case '[':
+            value = new JSONArray();
+            break;
+
+          default:
+            throw new InternalParserError();
+        }
+        break;
+      case NULL:
+      case BOOLEAN:
+      case NUMERIC:
+      case STRING:
+        value = this.token.getValue();
+        break;
+      default:
+        throw new InternalParserError();
+    }
+
+    if (root == null) {
+      root = value;
+    } else {
+      Object parent = stack.getLast();
+      if (parent instanceof JSONArray) {
+        ((JSONArray) parent).put(value);
+      } else {
+        ((JSONObject) parent).put(key, value);
+      }
+    }
+
+    if (value instanceof JSONArray || value instanceof JSONObject) {
+      stack.add(value);
+      if (value instanceof JSONArray) {
+        parseState = State.BEFORE_ARRAY_VALUE;
+      } else {
+        parseState = State.BEFORE_PROPERTY_NAME;
+      }
+    } else {
+      try {
+        Object current = stack.getLast();
+        if (current instanceof JSONArray) {
+          parseState = State.AFTER_ARRAY_VALUE;
+        } else {
+          parseState = State.AFTER_PROPERTY_VALUE;
+        }
+      } catch (NoSuchElementException e) {
+        parseState = State.END;
+      }
+    }
+  }
+
+  private void pop() {
+    stack.removeLast();
+
     try {
-      return source.charAt(pos);
-    } catch (StringIndexOutOfBoundsException e) {
-      return null;
+      Object current = stack.getLast();
+      if (current instanceof JSONArray) {
+        parseState = State.AFTER_ARRAY_VALUE;
+      } else {
+        parseState = State.AFTER_PROPERTY_VALUE;
+      }
+    } catch (NoSuchElementException ex) {
+      parseState = State.END;
     }
   }
 
@@ -897,6 +955,16 @@ public class Json5Parser {
 
   private SyntaxError invalidEOF() {
     return new SyntaxError("JSON5: invalid end of input at " + line + ":" + column);
+  }
+
+  private SyntaxError invalidIdentifier() {
+    column -= 5;
+    return new SyntaxError("JSON5: invalid identifier character at " + line + ":" + column);
+  }
+
+  private void separatorChar(char c) {
+    LOG.warning(
+        "JSON5: '" + formatChar(c) + "' in strings is not valid ECMAScript; consider escaping");
   }
 
   private enum TokenType { EOF, PUNCTUATOR, NULL, BOOLEAN, NUMERIC, STRING, IDENTIFIER }
