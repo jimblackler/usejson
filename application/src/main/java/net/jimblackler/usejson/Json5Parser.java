@@ -139,27 +139,28 @@ public class Json5Parser {
 
     switch (token.getType()) {
       case PUNCTUATOR:
-        switch (token.getValue().toString()) {
-          case "{":
+        Object token = this.token.getValue();
+        switch ((Character) token) {
+          case '{':
             value = new JSONObject();
             break;
 
-          case "[":
+          case '[':
             value = new JSONArray();
             break;
 
           default:
-            throw new SyntaxError("Unexpected");
+            throw new InternalParserError();
         }
         break;
       case NULL:
       case BOOLEAN:
       case NUMERIC:
       case STRING:
-        value = token.getValue();
+        value = this.token.getValue();
         break;
       default:
-        throw new SyntaxError("Unexpected token type " + token.getType());
+        throw new InternalParserError();
     }
 
     if (root == null) {
@@ -439,8 +440,9 @@ public class Json5Parser {
         }
 
         return new Token(TokenType.IDENTIFIER, buffer.toString());
+
       case IDENTIFIER_NAME_ESCAPE:
-        throw new SyntaxError("Unhandled state: " + state.name());
+        throw new InternalParserError("Unhandled state: " + state.name());
 
       case SIGN:
         switch (character) {
@@ -592,7 +594,6 @@ public class Json5Parser {
           lexState = State.DECIMAL_EXPONENT_INTEGER;
           return null;
         }
-
         throw invalidChar(read());
 
       case DECIMAL_EXPONENT_INTEGER:
@@ -623,6 +624,9 @@ public class Json5Parser {
         return new Token(TokenType.NUMERIC, sign * parseInt(buffer.substring(2), 16));
 
       case STRING:
+        if (character == null) {
+          throw invalidChar(read());
+        }
         switch (character) {
           case '\\':
             read();
