@@ -3,19 +3,25 @@ package net.jimblackler.usejson;
 import static java.lang.Integer.parseInt;
 
 import java.math.BigDecimal;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+/**
+ * JSON 5 parser.
+ *
+ * Ported to Java from https://github.com/json5/json5/blob/master/lib/parse.js by Jim Blacker.
+ */
 public class Json5Parser {
   private static final Logger LOG = Logger.getLogger(Json5Parser.class.getName());
 
   private final StringBuilder buffer = new StringBuilder();
   private String source;
   private State parseState;
-  private LinkedList<Object> stack;
+  private Deque<Object> stack;
   private int pos;
   private int line;
   private int column;
