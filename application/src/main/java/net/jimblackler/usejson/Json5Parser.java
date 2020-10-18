@@ -383,12 +383,12 @@ public class Json5Parser {
             return null;
 
           case '.':
-            buffer = new StringBuilder().append(read());
+            buffer = new StringBuilder().append(read().charValue());
             lexState = State.DECIMAL_POINT_LEADING;
             return null;
 
           case '0':
-            buffer = new StringBuilder().append(read());
+            buffer = new StringBuilder().append(read().charValue());
             lexState = State.ZERO;
             return null;
 
@@ -401,7 +401,7 @@ public class Json5Parser {
           case '7':
           case '8':
           case '9':
-            buffer = new StringBuilder().append(read());
+            buffer = new StringBuilder().append(read().charValue());
             lexState = State.DECIMAL_INTEGER;
             return null;
 
@@ -453,12 +453,12 @@ public class Json5Parser {
       case SIGN:
         switch (c) {
           case '.':
-            buffer = new StringBuilder().append(read());
+            buffer = new StringBuilder().append(read().charValue());
             lexState = State.DECIMAL_POINT_LEADING;
             return null;
 
           case '0':
-            buffer = new StringBuilder().append(read());
+            buffer = new StringBuilder().append(read().charValue());
             lexState = State.ZERO;
             return null;
 
@@ -471,7 +471,7 @@ public class Json5Parser {
           case '7':
           case '8':
           case '9':
-            buffer = new StringBuilder().append(read());
+            buffer = new StringBuilder().append(read().charValue());
             lexState = State.DECIMAL_INTEGER;
             return null;
 
@@ -684,7 +684,7 @@ public class Json5Parser {
         switch (c) {
           case '$':
           case '_':
-            buffer = new StringBuilder().append(read());
+            buffer = new StringBuilder().append(read().charValue());
             lexState = State.IDENTIFIER_NAME;
             return null;
 
