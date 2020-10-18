@@ -17,7 +17,7 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-public class Own3Test {
+public class OwnTest {
   private static final FileSystem FILE_SYSTEM = FileSystems.getDefault();
 
   @TestFactory
@@ -33,11 +33,11 @@ public class Own3Test {
   private Collection<DynamicNode> run(Path testDir, boolean shouldPass) throws IOException {
     Collection<DynamicNode> testsOut = new ArrayList<>();
     Json5JsWrapper json5JsWrapper = new Json5JsWrapper();
-    getLines(Own3Test.class.getResourceAsStream(testDir.toString()), testFile -> {
+    getLines(OwnTest.class.getResourceAsStream(testDir.toString()), testFile -> {
       testsOut.add(DynamicTest.dynamicTest(testFile, () -> {
         try {
           String content = streamToString(
-              Own3Test.class.getResourceAsStream(testDir.resolve(testFile).toString()));
+              OwnTest.class.getResourceAsStream(testDir.resolve(testFile).toString()));
           System.out.println(content);
           String ownString = "<invalid>";
           String wrappedString = "<invalid>";

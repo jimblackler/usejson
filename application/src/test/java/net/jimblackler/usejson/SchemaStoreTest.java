@@ -17,7 +17,7 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-public class SchemaStore3Test {
+public class SchemaStoreTest {
   private static final FileSystem FILE_SYSTEM = FileSystems.getDefault();
 
   @TestFactory
@@ -28,9 +28,9 @@ public class SchemaStore3Test {
     Path schemaPath = path0.resolve("schemas").resolve("json");
     Path testDir = path0.resolve("test");
 
-    getLines(SchemaStore3Test.class.getResourceAsStream(testDir.toString()), resource -> {
+    getLines(SchemaStoreTest.class.getResourceAsStream(testDir.toString()), resource -> {
       Path testSchema = schemaPath.resolve(resource + ".json");
-      URL resource1 = SchemaStore3Test.class.getResource(testSchema.toString());
+      URL resource1 = SchemaStoreTest.class.getResource(testSchema.toString());
       if (resource1 == null) {
         return;
       }
@@ -38,9 +38,9 @@ public class SchemaStore3Test {
       List<DynamicTest> tests = new ArrayList<>();
       Path directoryPath = testDir.resolve(resource);
       getLines(
-          SchemaStore3Test.class.getResourceAsStream(directoryPath.toString()), testFileName -> {
+          SchemaStoreTest.class.getResourceAsStream(directoryPath.toString()), testFileName -> {
             Path testFile = directoryPath.resolve(testFileName);
-            URL testDataUrl = SchemaStore3Test.class.getResource(testFile.toString());
+            URL testDataUrl = SchemaStoreTest.class.getResource(testFile.toString());
             if (testDataUrl == null) {
               return;
             }
@@ -48,7 +48,7 @@ public class SchemaStore3Test {
             try {
               tests.add(DynamicTest.dynamicTest(testFileName, testDataUrl.toURI(), () -> {
                 String content =
-                    streamToString(SchemaStore3Test.class.getResourceAsStream(testFile.toString()));
+                    streamToString(SchemaStoreTest.class.getResourceAsStream(testFile.toString()));
                 long startTimeOwn = System.nanoTime();
                 Json5Parser json5Parser = new Json5Parser();
                 Object own = json5Parser.parse(content);
