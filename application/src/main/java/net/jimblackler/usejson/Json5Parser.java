@@ -49,14 +49,14 @@ public class Json5Parser {
     do {
       token = lex();
 
-      parseStates(parseState);
+      parseStates();
     } while (token.getType() != TokenType.EOF);
 
     return root;
   }
 
-  private void parseStates(State state) {
-    switch (state) {
+  private void parseStates() {
+    switch (parseState) {
       case START:
         if (token.getType() == TokenType.EOF) {
           throw invalidEOF();
@@ -100,7 +100,7 @@ public class Json5Parser {
           throw invalidEOF();
         }
 
-        if (token.getType() == TokenType.PUNCTUATOR && "]".equals(token.getValue().toString())) {
+        if (token.getType() == TokenType.PUNCTUATOR && ((Character) token.getValue()) == ']') {
           pop();
           return;
         }
@@ -113,7 +113,7 @@ public class Json5Parser {
           throw invalidEOF();
         }
 
-        switch (token.getValue().toString().charAt(0)) {
+        switch ((Character) token.getValue()) {
           case ',':
             parseState = State.BEFORE_PROPERTY_NAME;
             return;
@@ -128,7 +128,7 @@ public class Json5Parser {
           throw invalidEOF();
         }
 
-        switch (token.getValue().toString().charAt(0)) {
+        switch ((Character) token.getValue()) {
           case ',':
             parseState = State.BEFORE_ARRAY_VALUE;
             return;
@@ -138,7 +138,7 @@ public class Json5Parser {
         }
         break;
       case END:
-        break; // what about the comment about this being unreachable?
+        break;
     }
   }
 
