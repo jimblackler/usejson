@@ -3,15 +3,15 @@ package net.jimblackler.usejson;
 import static java.lang.Integer.parseInt;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Json5Parser {
   private String source;
   private State parseState;
-  private List<Object> stack;
+  private LinkedList<Object> stack;
   private int pos;
   private int line;
   private int column;
@@ -39,7 +39,7 @@ public class Json5Parser {
   public Object parse(String text) {
     source = text;
     parseState = State.START;
-    stack = new ArrayList<>();
+    stack = new LinkedList<>();
     pos = 0;
     line = 1;
     column = 0;
@@ -174,7 +174,7 @@ public class Json5Parser {
     if (root == null) {
       root = value;
     } else {
-      Object parent = stack.get(stack.size() - 1);
+      Object parent = stack.getLast();
       if (parent instanceof JSONArray) {
         ((JSONArray) parent).put(value);
       } else {
@@ -190,32 +190,31 @@ public class Json5Parser {
         parseState = State.BEFORE_PROPERTY_NAME;
       }
     } else {
-      if (stack.isEmpty()) {
+      try {
+        Object current = stack.getLast();
+        if (current instanceof JSONArray) {
+          parseState = State.AFTER_ARRAY_VALUE;
+        } else {
+          parseState = State.AFTER_PROPERTY_VALUE;
+        }
+      } catch (NoSuchElementException e) {
         parseState = State.END;
-        return;
-      }
-      Object current = stack.get(stack.size() - 1);
-      if (current instanceof JSONArray) {
-        parseState = State.AFTER_ARRAY_VALUE;
-      } else {
-        parseState = State.AFTER_PROPERTY_VALUE;
       }
     }
   }
 
   private void pop() {
-    stack.remove(stack.size() - 1);
+    stack.removeLast();
 
-    if (stack.isEmpty()) {
+    try {
+      Object current = stack.getLast();
+      if (current instanceof JSONArray) {
+        parseState = State.AFTER_ARRAY_VALUE;
+      } else {
+        parseState = State.AFTER_PROPERTY_VALUE;
+      }
+    } catch (NoSuchElementException ex) {
       parseState = State.END;
-      return;
-    }
-
-    Object current = stack.get(stack.size() - 1);
-    if (current instanceof JSONArray) {
-      parseState = State.AFTER_ARRAY_VALUE;
-    } else {
-      parseState = State.AFTER_PROPERTY_VALUE;
     }
   }
 
