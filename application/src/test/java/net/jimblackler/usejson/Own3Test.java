@@ -40,23 +40,42 @@ public class Own3Test {
           String content = streamToString(
               Own3Test.class.getResourceAsStream(testDir.resolve(testFile).toString()));
           System.out.println(content);
+          String ownString = "<invalid>";
 
           try {
             Json5Parser json5Parser = new Json5Parser();
             Object own = json5Parser.parse(content);
             assertTrue(shouldPass);
+            ownString = DocumentUtils.toString(own);
+          } catch (SyntaxError ex) {
+            if (shouldPass) {
+              throw ex;
+            } else {
+              ex.printStackTrace();
+            }
+          }
 
-            String ownString = DocumentUtils.toString(own);
-            if (!testFile.endsWith(".json5")) {
+
+          if (!testFile.endsWith(".json5")) {
+            try {
               String orgString = DocumentUtils.toString(DocumentUtils.parseJson(content));
               assertEquals(orgString, ownString);
+              assertTrue(shouldPass);
+            } catch (JSONException ex) {
+              if (shouldPass) {
+                throw ex;
+              } else {
+                ex.printStackTrace();
+              }
             }
+          }
 
+          try {
             String org2String = DocumentUtils.toString(
                 DocumentUtils.parseJson(json5JsWrapper.json5ToJson(content)));
             assertEquals(org2String, ownString);
-
-          } catch (JsonParseException | JSONException | JSON5ParseError | SyntaxError ex) {
+            assertTrue(shouldPass);
+          } catch (SyntaxError ex) {
             if (shouldPass) {
               throw ex;
             } else {

@@ -5,7 +5,8 @@ The importer differs from `org.json` in the following ways:
 * `null` values are imported.
 * Duplicate keys are permitted. The final instance of that key will take
   priority.
-* It is about 8 times slower.
+* Empty array entries (i.e. no content followed by a comma, such as `[,]`) are
+  invalid.
 
 
 Note

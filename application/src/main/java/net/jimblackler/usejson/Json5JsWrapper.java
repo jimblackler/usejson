@@ -5,6 +5,7 @@ import static net.jimblackler.usejson.CacheLoader.load;
 import java.io.IOException;
 import java.net.URI;
 import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Value;
 
 public class Json5JsWrapper {
@@ -17,6 +18,10 @@ public class Json5JsWrapper {
   }
 
   public String json5ToJson(String str) {
-    return _json5ToJson.execute(str).toString();
+    try {
+      return _json5ToJson.execute(str).toString();
+    } catch (PolyglotException ex) {
+      throw new SyntaxError(ex);
+    }
   }
 }
