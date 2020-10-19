@@ -1,4 +1,4 @@
 rootProject.name = 'usejson'
 
-include ':application'
+include ':library'
 
