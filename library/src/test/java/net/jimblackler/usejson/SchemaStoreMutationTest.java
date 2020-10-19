@@ -70,7 +70,7 @@ public class SchemaStoreMutationTest {
 
                 try {
                   Json5Parser json5Parser = new Json5Parser(); // MOVE THIS OUT!!
-                  Object own = json5Parser.parse(content);
+                  Object own = OrgJsonAdapter.adapt(json5Parser.parse(content));
                   ownString = DocumentUtils.toString(own);
                 } catch (SyntaxError ex) {
                   ownError = ex.getMessage();
