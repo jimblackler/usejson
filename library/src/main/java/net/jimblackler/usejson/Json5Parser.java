@@ -3,12 +3,14 @@ package net.jimblackler.usejson;
 import static java.lang.Integer.parseInt;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 /**
  * JSON 5 parser.
@@ -69,6 +71,17 @@ public class Json5Parser {
     return String.valueOf(c);
   }
 
+  /**
+   * Converts the text of a JSON5 document to an Object, which could be:
+   * - null.
+   * - Boolean.
+   * - String.
+   * - Number of a sub-type of a Number.
+   * - Map<String, Object> representing a dictionary (child values fitting the same pattern).
+   * - List<> representing an array (child values fitting the same pattern).
+   * @param text The document.
+   * @return The new Object.
+   */
   public Object parse(String text) {
     source = text;
     parseState = State.START;
@@ -906,11 +919,11 @@ public class Json5Parser {
         Object token = this.token.getValue();
         switch ((Character) token) {
           case '{':
-            value = new JSONObject();
+            value = new LinkedHashMap<String, Object>();
             break;
 
           case '[':
-            value = new JSONArray();
+            value = new ArrayList<>();
             break;
 
           default:
@@ -931,16 +944,16 @@ public class Json5Parser {
       root = value;
     } else {
       Object parent = stack.getLast();
-      if (parent instanceof JSONArray) {
-        ((JSONArray) parent).put(value);
+      if (parent instanceof List) {
+        ((List<Object>) parent).add(value);
       } else {
-        ((JSONObject) parent).put(key, value);
+        ((Map<String, Object>) parent).put(key, value);
       }
     }
 
-    if (value instanceof JSONArray || value instanceof JSONObject) {
+    if (value instanceof List || value instanceof Map) {
       stack.add(value);
-      if (value instanceof JSONArray) {
+      if (value instanceof List) {
         parseState = State.BEFORE_ARRAY_VALUE;
       } else {
         parseState = State.BEFORE_PROPERTY_NAME;
@@ -948,7 +961,7 @@ public class Json5Parser {
     } else {
       try {
         Object current = stack.getLast();
-        if (current instanceof JSONArray) {
+        if (current instanceof List) {
           parseState = State.AFTER_ARRAY_VALUE;
         } else {
           parseState = State.AFTER_PROPERTY_VALUE;
@@ -964,7 +977,7 @@ public class Json5Parser {
 
     try {
       Object current = stack.getLast();
-      if (current instanceof JSONArray) {
+      if (current instanceof List) {
         parseState = State.AFTER_ARRAY_VALUE;
       } else {
         parseState = State.AFTER_PROPERTY_VALUE;
