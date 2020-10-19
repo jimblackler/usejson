@@ -23,6 +23,7 @@ public class SchemaStoreTest {
   @TestFactory
   Collection<DynamicNode> all() {
     Collection<DynamicNode> testsOut = new ArrayList<>();
+    Json5Parser json5Parser = new Json5Parser();
 
     Path path0 = FILE_SYSTEM.getPath("/SchemaStore").resolve("src");
     Path schemaPath = path0.resolve("schemas").resolve("json");
@@ -50,8 +51,7 @@ public class SchemaStoreTest {
                 String content =
                     streamToString(SchemaStoreTest.class.getResourceAsStream(testFile.toString()));
                 long startTimeOwn = System.nanoTime();
-                Json5Parser json5Parser = new Json5Parser();
-                Object own = json5Parser.parse(content);
+                Object own = OrgJsonAdapter.adapt(json5Parser.parse(content));
                 long timeOwn = System.nanoTime() - startTimeOwn;
                 assert own != null;
                 long startTimeOrg = System.nanoTime();
@@ -59,7 +59,7 @@ public class SchemaStoreTest {
                 long timeOrg = System.nanoTime() - startTimeOrg;
                 assert org != null;
                 String orgString = DocumentUtils.toString(org);
-                String ownString = DocumentUtils.toString(own);
+                String ownString = DocumentUtils.toString(DocumentUtils.parseJson(own.toString()));
                 System.out.println(orgString);
                 assertEquals(orgString, ownString);
                 System.out.println("Own: " + timeOwn);
