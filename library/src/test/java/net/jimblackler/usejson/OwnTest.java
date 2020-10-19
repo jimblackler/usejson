@@ -32,6 +32,7 @@ public class OwnTest {
 
   private Collection<DynamicNode> run(Path testDir, boolean shouldPass) throws IOException {
     Collection<DynamicNode> testsOut = new ArrayList<>();
+    Json5Parser json5Parser = new Json5Parser();
     Json5JsWrapper json5JsWrapper = new Json5JsWrapper();
     getLines(OwnTest.class.getResourceAsStream(testDir.toString()), testFile -> {
       testsOut.add(DynamicTest.dynamicTest(testFile, () -> {
@@ -54,8 +55,7 @@ public class OwnTest {
           }
 
           try {
-            Json5Parser json5Parser = new Json5Parser();
-            Object own = json5Parser.parse(content);
+            Object own = OrgJsonParser.parse(content);
             assertTrue(shouldPass);
             ownString = DocumentUtils.toString(own);
           } catch (SyntaxError ex) {
