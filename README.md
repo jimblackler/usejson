@@ -1,8 +1,8 @@
 ## usejson
 
-A Java library that allows JSON5 format files to be read into an ordinary tree
-of Java objects (using types `Map<>` for dictionaries, and type `List<>` for
-arrays).
+A Java library that allows JSON5 or JSON format text to be parsed into an
+ordinary tree of Java objects (using types `Map<>` for dictionaries, and type
+`List<>` for arrays).
  
 The parser is ported from the reference JavaScript JSON5 parser;
 [json5](https://github.com/json5/json5). 
