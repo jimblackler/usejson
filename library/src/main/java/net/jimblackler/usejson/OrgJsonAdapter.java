@@ -1,9 +1,8 @@
 package net.jimblackler.usejson;
 
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
-import java.util.Map;
 
 public class OrgJsonAdapter {
   /**
