@@ -1,5 +1,7 @@
 package net.jimblackler.usejson;
 
+import java.lang.Iterable;
+import java.util.Iterator;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -13,7 +15,14 @@ public class OrgJsonAdapter {
    */
   public static Object adapt(Object value) {
     if (value instanceof Iterable<?>) {
-      return new JSONArray((Iterable<?>) value);
+      // The below can be simplified when this patch has landed to a published version of
+      // `org.json`.
+      // https://github.com/stleary/JSON-java/commit/f37c2d67c57f1217b0c42b29d636da0b2e750bfa
+      JSONArray array = new JSONArray();
+      for (Object o : (Iterable<?>) value) {
+        array.put(o);
+      }
+      return array;
     }
 
     if (value instanceof Map<?, ?>) {
