@@ -20,7 +20,7 @@ public class OrgJsonAdapter {
       // https://github.com/stleary/JSON-java/commit/f37c2d67c57f1217b0c42b29d636da0b2e750bfa
       JSONArray array = new JSONArray();
       for (Object o : (Iterable<?>) value) {
-        array.put(o);
+        array.put(JSONObject.wrap(o));
       }
       return array;
     }
