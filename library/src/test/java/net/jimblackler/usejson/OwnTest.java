@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -32,7 +33,6 @@ public class OwnTest {
 
   private Collection<DynamicNode> run(Path testDir, boolean shouldPass) throws IOException {
     Collection<DynamicNode> testsOut = new ArrayList<>();
-    Json5Parser json5Parser = new Json5Parser();
     Json5JsWrapper json5JsWrapper = new Json5JsWrapper();
     getLines(OwnTest.class.getResourceAsStream(testDir.toString()), testFile -> {
       testsOut.add(DynamicTest.dynamicTest(testFile, () -> {
@@ -55,7 +55,7 @@ public class OwnTest {
           }
 
           try {
-            Object own = OrgJsonParser.parse(content);
+            Object own = JSONObject.wrap(new Json5Parser().parse(content));
             assertTrue(shouldPass);
             ownString = DocumentUtils.toString(own);
           } catch (SyntaxError ex) {

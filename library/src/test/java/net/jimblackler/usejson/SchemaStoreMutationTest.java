@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import org.json.JSONObject;
 import org.junit.jupiter.api.DynamicContainer;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
@@ -70,7 +71,7 @@ public class SchemaStoreMutationTest {
 
                 try {
                   Json5Parser json5Parser = new Json5Parser(); // MOVE THIS OUT!!
-                  Object own = OrgJsonAdapter.adapt(json5Parser.parse(content));
+                  Object own = JSONObject.wrap(json5Parser.parse(content));
                   ownString = DocumentUtils.toString(own);
                 } catch (SyntaxError ex) {
                   ownError = ex.getMessage();

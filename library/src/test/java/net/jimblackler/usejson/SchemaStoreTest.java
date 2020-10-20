@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.json.JSONObject;
 import org.junit.jupiter.api.DynamicContainer;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
@@ -51,7 +52,7 @@ public class SchemaStoreTest {
                 String content =
                     streamToString(SchemaStoreTest.class.getResourceAsStream(testFile.toString()));
                 long startTimeOwn = System.nanoTime();
-                Object own = OrgJsonAdapter.adapt(json5Parser.parse(content));
+                Object own = JSONObject.wrap(json5Parser.parse(content));
                 long timeOwn = System.nanoTime() - startTimeOwn;
                 assert own != null;
                 long startTimeOrg = System.nanoTime();
