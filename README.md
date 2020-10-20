@@ -9,7 +9,7 @@ The parser is ported from the reference JavaScript JSON5 parser;
 Parser output is compatible with `org.json.JSONObject.wrap`, allowing output to
 be easily converted into `org.json` objects. This allows JSON5 files to be used
 in applications written for `org.json` types; allowing comments, unquoted keys,
-and more.
+single quoted strings, line continuation in strings, hex numbers and more.
 
 The library is written by [Jim Blackler](mailto:jimblackler@gmail.com) and
 offered under the Apache 2.0 license.
@@ -19,7 +19,7 @@ offered under the Apache 2.0 license.
 `org.json` objects are able to contain data parsed from JSON5 files with the
 following exception:
 
-As JSON5 is a superset of JSON, classic JSON files can also be read. However
+As JSON5 is a superset of JSON, classic JSON files can also be read. However,
 this importer differs from `org.json` in the following ways:
 
 * Duplicate keys are permitted. The final instance of that key will take
