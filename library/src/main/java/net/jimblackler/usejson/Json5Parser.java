@@ -3,6 +3,7 @@ package net.jimblackler.usejson;
 import static java.lang.Integer.parseInt;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedHashMap;
@@ -472,7 +473,9 @@ public class Json5Parser {
             return null;
           }
         }
-        return new Token(TokenType.NUMERIC, sign * parseInt(buffer.toString()));
+        return new Token(TokenType.NUMERIC,
+            NumberUtils.toBestObject(
+                new BigInteger(buffer.toString()).multiply(BigInteger.valueOf(sign))));
 
       case DECIMAL_POINT_LEADING:
         if (c != null) {
@@ -498,8 +501,9 @@ public class Json5Parser {
           lexState = State.DECIMAL_FRACTION;
           return null;
         }
-
-        return new Token(TokenType.NUMERIC, sign * parseInt(buffer.toString()));
+        return new Token(TokenType.NUMERIC,
+            NumberUtils.toBestObject(
+                new BigInteger(buffer.toString()).multiply(BigInteger.valueOf(sign))));
 
       case DECIMAL_FRACTION:
         if (c != null) {
