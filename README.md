@@ -3,6 +3,9 @@
 A Java library that parses JSON5 or JSON format into an ordinary tree of Java
 objects (using types `Map<>` for dictionaries, and type `List<>` for arrays).
  
+An online demonstration [is here](https://tryjsonschematypes.appspot.com/#json5);
+it shows the library being used to convert JSON5 objects to JSON5.
+
 The parser is ported from the reference JavaScript JSON5 parser;
 [json5](https://github.com/json5/json5). 
  
