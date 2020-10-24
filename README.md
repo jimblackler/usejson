@@ -2,6 +2,9 @@
 
 A Java library that parses JSON5 or JSON format into an ordinary tree of Java
 objects (using types `Map<>` for dictionaries, and type `List<>` for arrays).
+
+It is live on JitPack.
+[![](https://jitpack.io/v/net.jimblackler/usejson.svg)](https://jitpack.io/#net.jimblackler/usejson)
  
 An online demonstration [is here](https://tryjsonschematypes.appspot.com/#json5);
 it shows the library being used to convert JSON5 objects to JSON5.
