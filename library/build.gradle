@@ -34,7 +34,7 @@ afterEvaluate {
             release(MavenPublication) {
                 group = 'net.jimblackler'
                 artifactId = 'usejson'
-                version = '0.1.3'
+                version = '0.1.4'
                 artifact(sourceJar)
                 from components.java
             }
