@@ -7,7 +7,7 @@ It is live on JitPack.
 [![](https://jitpack.io/v/net.jimblackler/usejson.svg)](https://jitpack.io/#net.jimblackler/usejson)
  
 An online demonstration [is here](https://tryjsonschematypes.appspot.com/#json5);
-it shows the library being used to convert JSON5 objects to JSON5.
+it shows the library being used to convert JSON5 objects to plain JSON.
 
 The parser is ported from the reference JavaScript JSON5 parser;
 [json5](https://github.com/json5/json5). 
