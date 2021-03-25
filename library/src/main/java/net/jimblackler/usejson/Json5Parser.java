@@ -83,7 +83,7 @@ public class Json5Parser {
    * @param text The document.
    * @return The new Object.
    */
-  public Object parse(String text) {
+  public <T> T parse(String text) {
     source = text;
     parseState = State.START;
     stack = new LinkedList<>();
@@ -99,7 +99,7 @@ public class Json5Parser {
       parseStates();
     } while (token.getType() != TokenType.EOF);
 
-    return root;
+    return (T) root;
   }
 
   private Token lex() {
