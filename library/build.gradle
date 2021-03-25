@@ -6,15 +6,6 @@ plugins {
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-        url 'https://jitpack.io'
-    }
-    jcenter();
-}
-
 dependencies {
     //implementation 'com.github.jimblackler:JSON-java:v0.6-alpha'
     testImplementation 'org.graalvm.js:js:20.2.0'
