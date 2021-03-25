@@ -7,7 +7,6 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
-    //implementation 'com.github.jimblackler:JSON-java:v0.6-alpha'
     testImplementation 'org.graalvm.js:js:20.2.0'
     testImplementation 'org.graalvm.sdk:graal-sdk:20.2.0'
     testImplementation 'org.json:json:20200518'
