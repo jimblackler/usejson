@@ -7,10 +7,10 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
-    testImplementation 'org.graalvm.js:js:20.2.0'
-    testImplementation 'org.graalvm.sdk:graal-sdk:20.2.0'
-    testImplementation 'org.json:json:20200518'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testImplementation 'org.graalvm.js:js:21.2.0'
+    testImplementation 'org.graalvm.sdk:graal-sdk:21.2.0'
+    testImplementation 'org.json:json:20210307'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
 }
 
 task sourceJar(type: Jar) {
